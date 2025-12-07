@@ -3,7 +3,7 @@
 The GitHub action that does all setup for pnpm projects.
 - checkout
 - node
-- volta
+- volta support (without the volta action)
 - pnpm + cache
 - local turborepo server
 
@@ -66,5 +66,5 @@ env:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: 'Setup dependencies and cache'
-      uses: NullVoxPopuli/action-setup-pnpm@v2
+      uses: wyvox/action-setup-pnpm@v2
 ```

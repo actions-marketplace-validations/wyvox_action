@@ -1,5 +1,5 @@
-name: 'Setup repo, pnpm, node, cache'
-description: 'Checks out repository, installs pnpm, uses actions/setup-node for cache, and then runs pnpm install. Optionally provides artifact-based turboroepo.'
+name: "pnpm monorepo action with no boilerplate"
+description: 'Removes all boilerplate: checkout, pnpm, cache, optional turborepo.'
 author: NullVoxPopuli
 branding:
   icon: 'package'
@@ -9,10 +9,13 @@ inputs:
   node-version:
     description: "Override the default node version, or override what is specified in your project's volta config"
     required: false
+  node-registry-url:
+    description: "Optional registry to set up for auth. Will set the registry in a project level .npmrc and .yarnrc file, and set up auth to read in from env.NODE_AUTH_TOKEN."
+    required: false
+    default: ''    
   pnpm-version:
     description: 'Override the default pnpm version, which defaults to the latest 8.x'
     required: false
-    default: 8
   pnpm-args:
     description: 'Directly pass args to pnpm'
     required: false
@@ -24,6 +27,12 @@ inputs:
   fetch-depth:
     description: 'Number of commits to fetch. 0 indicates all history for all branches and tags.'
     default: 1
+  lfs:
+    description: 'Whether to download Git-LFS files'
+    default: ''
+  ref:
+    description: 'Which git ref to use when checking out code'
+    default: ''
 
   # turborepo options
   repo-token:
@@ -35,21 +44,23 @@ runs:
   using: 'composite'
   steps:
     - name: 'Checkout repository'
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         persist-credentials: ${{ inputs.persist-credentials }}
         fetch-depth: ${{ inputs.fetch-depth }}
+        lfs: ${{ inputs.lfs }}
 
     - name: 'Setup local TurboRepo server'
       if: ${{ inputs.repo-token }}
-      uses: felixmosh/turborepo-gh-artifacts@v2
+      uses: felixmosh/turborepo-gh-artifacts@v3
       with:
         repo-token: ${{ inputs.repo-token }}
 
     - name: 'Setup dependencies and cache'
-      uses: wyvox/action-setup-pnpm@v2
+      uses: wyvox/action-setup-pnpm@v3
       with: 
         node-version: ${{ inputs.node-version }}
         pnpm-version: ${{ inputs.pnpm-version }}
         args: ${{ inputs.pnpm-args }}
+        node-registry-url: ${{ inputs.node-registry-url }}
 
